@@ -70,13 +70,13 @@ streamlit run dashboard/app.py
 ```
 
 #### 🌍 Sharing the Dashboard Worldwide
-To share a live view of the local dashboard over the internet (without deploying a database), the port can be tunneled securely using **[ngrok](https://ngrok.com/)**:
+To make your locally running dashboard accessible over the internet without deploying it, expose port `8501` through **[ngrok](https://ngrok.com/)**:
 
 ```bash
-# 1. Install ngrok (if not already installed)
+# 1. Install ngrok, if needed
 brew install ngrok/ngrok/ngrok
 
-# 2. Expose the dashboard port securely
+# 2. Start a secure tunnel to the dashboard
 ngrok http 8501
 ```
 
