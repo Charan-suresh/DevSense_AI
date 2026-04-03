@@ -16,3 +16,4 @@ __pycache__/
 *$py.class
 >>>>>>> origin/Siddharth/backend
 __pycache__/
+.DS_Store
