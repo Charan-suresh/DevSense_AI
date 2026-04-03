@@ -1,10 +1,15 @@
 from fastapi import FastAPI, WebSocket
-from claude_handler import resolve_stall
+from backend.claude_handler import resolve_stall
 import json
 from datetime import datetime
 import os
 
 app = FastAPI()
+STALL_LOG_FILE = os.path.join(
+    os.path.dirname(os.path.dirname(__file__)),
+    "data",
+    "stall_log.json",
+)
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
@@ -24,7 +29,7 @@ async def websocket_endpoint(websocket: WebSocket):
             }
             
             # Append to stall_log.json
-            with open("stall_log.json", "a") as f:
+            with open(STALL_LOG_FILE, "a") as f:
                 json.dump(log_entry, f)
                 f.write("\n")
         except Exception as e:
