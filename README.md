@@ -9,12 +9,12 @@
 Developers frequently get stuck in code stalls (idle loops, repeated errors, and code thrashing) without fast, observable insights. Existing AI tools often require developers to context-switch to a chat window or manually prompt the AI. 
 
 ## 🚀 Our Solution
-DevSense AI lives entirely in the background. It watches your flow natively inside VS Code and **only interrupts you when it detects you are struggling**. It then uses **LLaMA-3.3-70b via Groq** to instantly generate a solution, projecting it right above your broken code.
+DevSense AI lives entirely in the background. It watches the developer's flow natively inside VS Code and **only interrupts when it detects the developer is struggling**. It then uses **LLaMA-3.3-70b via Groq** to instantly generate a solution, projecting it right above the broken code.
 
 ### ✨ What It Does
-- 💡 **Explains the Root Cause:** A one-line explanation of why your code broke.
+- 💡 **Explains the Root Cause:** A one-line explanation of why the code broke.
 - ⚡ **Shows the Fix Inline:** A specific, actionable summary of the required fix.
-- ✨ **Applies the Fix Automatically:** An interactive CodeLens button that natively rewrites the broken code in your editor with a single click.
+- ✨ **Applies the Fix Automatically:** An interactive CodeLens button that natively rewrites the broken code in the editor with a single click.
 
 ### 🕵️‍♂️ How it Detects Stalls (Core Trackers)
 The master `StallDetector` fires off our AI resolution engine when it detects an overlap of any 2 of our 3 proprietary trackers:
@@ -36,14 +36,14 @@ The master `StallDetector` fires off our AI resolution engine when it detects an
 ## 🛠️ How to Run the Project Locally
 
 ### 1. Backend Server Setup
-Start by configuring your environment strings and launching the Python backend.
+Start by configuring the environment strings and launching the Python backend.
 
 ```bash
-# 1. Activate your virtual environment and install dependencies
+# 1. Activate the virtual environment and install dependencies
 source .venv/bin/activate
 pip install -r requirements.txt
 
-# 2. Add your Groq API Key to the .env file
+# 2. Add a Groq API Key to the .env file
 echo "GROQ_API_KEY=gsk_your_api_key_here" > .env
 
 # 3. Launch the FastAPI WebSocket Server
@@ -63,34 +63,33 @@ code --extensionDevelopmentPath=$(pwd) ../
 *Alternatively: Open the `stall-detector` folder inside VS Code and hit **F5** to automatically attach the debugger.*
 
 ### 3. Open the Analytics Dashboard (Optional)
-Run our local telemetry dashboard to see anonymized stall tracking in real-time.
+Run the local telemetry dashboard to see anonymized stall tracking in real-time.
 ```bash
 # In another terminal window:
 streamlit run dashboard/app.py
 ```
 
 #### 🌍 Sharing the Dashboard Worldwide
-If you want to share a live view of your local dashboard with anyone over the internet (without deploying a database), you can tunnel the port securely using **[ngrok](https://ngrok.com/)**:
+To share a live view of the local dashboard over the internet (without deploying a database), the port can be tunneled securely using **[ngrok](https://ngrok.com/)**:
 
 ```bash
-# 1. Install ngrok (if you haven't already)
+# 1. Install ngrok (if not already installed)
 brew install ngrok/ngrok/ngrok
 
 # 2. Expose the dashboard port securely
 ngrok http 8501
 ```
 
-
 ---
 
 ## 💡 How to Test it Live
-1. In your **Extension Development Host** window, open any Python or C++ file.
+1. In the **Extension Development Host** window, open any Python or C++ file.
 2. Intentionally type a blatant syntax or logic error (e.g., `print(undefined_variable)`).
 3. Wait for the standard red squiggly line to appear under the error.
-4. **Take your hands off the keyboard for 25 seconds.**
-5. DevSense will overlap your "Error" state with an "Idle" state and instantly ping the local WebSocket backend -> Groq.
-6. A set of three CodeLenses will appear natively in your editor:
+4. **Stop typing and leave the cursor idle for 25 seconds.**
+5. DevSense will overlap the "Error" state with an "Idle" state and instantly ping the local WebSocket backend -> Groq.
+6. A set of three CodeLenses will appear natively in the editor:
    - 💡 An explanation of the problem.
    - ⚡ A summary of the fix.
    - ✨ An interactive **Apply Fix** button.
-7. Click **✨ Apply Fix** to see your code instantly and automatically repaired!
+7. Click **✨ Apply Fix** to see the code instantly and automatically repaired!
