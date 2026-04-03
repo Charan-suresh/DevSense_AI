@@ -34,6 +34,9 @@ The master `StallDetector` fires off our AI resolution engine when it detects an
 - **AI Brain**: Powered by **Groq (`llama-3.3-70b-versatile`)** for extremely low-latency, highly contextual code diagnostics.
 - **Telemetry Dashboard**: Built with **Streamlit**. Reads our `stall_log.json` output to visualize team bottlenecks, stall distribution by language, and AI resolution success rates.
 
+### 📈 Dashboard Preview
+![DevSense stall detection dashboard preview](assets/dashboard_preview.png)
+
 ---
 
 ## 🛠️ How to Run the Project Locally
