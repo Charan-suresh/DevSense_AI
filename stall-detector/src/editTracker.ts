@@ -28,10 +28,10 @@ export class EditTracker {
     }
 
     private async handleDocumentChange(e: vscode.TextDocumentChangeEvent) {
-        if (e.document.uri.scheme !== 'file') return;
+        if (e.document.uri.scheme !== 'file') {return;}
 
         const editor = vscode.window.activeTextEditor;
-        if (!editor || editor.document.uri.toString() !== e.document.uri.toString()) return;
+        if (!editor || editor.document.uri.toString() !== e.document.uri.toString()) {return;}
 
         const position = editor.selection.active;
 
@@ -51,7 +51,7 @@ export class EditTracker {
                 document.uri
             );
 
-            if (!symbols || symbols.length === 0) return;
+            if (!symbols || symbols.length === 0) {return;}
 
             const targetSymbol = this.findEnclosingSymbol(symbols, position);
             if (targetSymbol) {
@@ -108,7 +108,7 @@ export class EditTracker {
     }
 
     public dispose() {
-        if (this.debounceTimer) clearTimeout(this.debounceTimer);
+        if (this.debounceTimer) {clearTimeout(this.debounceTimer);}
         this.onRepeatedEditEvent.dispose();
     }
 }

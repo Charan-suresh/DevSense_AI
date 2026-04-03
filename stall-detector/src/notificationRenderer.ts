@@ -28,7 +28,7 @@ export class NotificationRenderer implements vscode.CodeLensProvider {
 
     private addResolution(uriString: string, resolution: string) {
         const editor = vscode.window.visibleTextEditors.find(e => e.document.uri.toString() === uriString);
-        if (!editor) return;
+        if (!editor) {return;}
 
         let line = editor.selection.active.line;
         const diagnostics = vscode.languages.getDiagnostics(editor.document.uri);

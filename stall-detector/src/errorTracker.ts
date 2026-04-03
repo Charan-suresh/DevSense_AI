@@ -27,7 +27,7 @@ export class ErrorTracker {
         const now = Date.now();
 
         for (const uri of e.uris) {
-            if (uri.scheme !== 'file') continue;
+            if (uri.scheme !== 'file') {continue;}
 
             const key = uri.toString();
             const diagnostics = vscode.languages.getDiagnostics(uri);
@@ -40,7 +40,7 @@ export class ErrorTracker {
             const newErrors = currentMessages.filter(msg => !lastSeen.includes(msg));
             this.lastSeenDiagnostics.set(key, currentMessages);
 
-            if (newErrors.length === 0) continue;
+            if (newErrors.length === 0) {continue;}
 
             let history = this.diagnosticsHistory.get(key) || [];
             // filter out old
