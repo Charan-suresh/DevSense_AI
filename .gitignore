@@ -1,1 +1,17 @@
+<<<<<<< HEAD
 .DS_Store
+=======
+# Environments
+.env
+.venv/
+venv/
+env/
+
+# Database
+chroma_db/
+
+# Python caching
+__pycache__/
+*.py[cod]
+*$py.class
+>>>>>>> origin/Siddharth/backend
