@@ -16,6 +16,9 @@ DevSense AI lives entirely in the background. It watches the developer's flow na
 - ⚡ **Shows the Fix Inline:** A specific, actionable summary of the required fix.
 - ✨ **Applies the Fix Automatically:** An interactive CodeLens button that natively rewrites the broken code in the editor with a single click.
 
+### 📊 Why DevSense Is Different
+![DevSense comparison across activation, context awareness, and workflow impact](assets/devsense_comparison.png)
+
 ### 🕵️‍♂️ How it Detects Stalls (Core Trackers)
 The master `StallDetector` fires off our AI resolution engine when it detects an overlap of any 2 of our 3 proprietary trackers:
 1. 🕒 **Idle Tracker**: Detects when a developer stops typing or moving their cursor for 25 seconds immediately after a code error.
