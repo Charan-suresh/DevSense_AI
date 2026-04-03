@@ -68,8 +68,8 @@ export class ErrorTracker {
                             errorMessage: record.message
                         });
 
-                        // clear flag after 2 minutes so it can fire again if needed later
-                        setTimeout(() => this.alreadyFiredErrors.delete(uniqueKey), this.TIME_WINDOW);
+                        // clear flag after 10 seconds so it can fire again if needed quickly (easiest for testing)
+                        setTimeout(() => this.alreadyFiredErrors.delete(uniqueKey), 10000);
                     }
                 }
             }

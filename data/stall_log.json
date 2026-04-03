@@ -17,4 +17,14 @@
     "stall_type": "repeated_edit",
     "resolution_status": "resolved"
   }
-]
+]{"timestamp": "2026-04-03T19:03:04.632739", "language": "python", "stall_type": "idle + repeated error", "resolution_status": "resolved"}
+{"timestamp": "2026-04-03T19:06:31.127608", "language": "python", "stall_type": "idle + repeated error", "resolution_status": "resolved"}
+{"timestamp": "2026-04-03T19:06:32.696498", "language": "typescript", "stall_type": "repeated edit + idle", "resolution_status": "resolved"}
+{"timestamp": "2026-04-03T19:06:34.697992", "language": "python", "stall_type": "idle", "resolution_status": "resolved"}
+{"timestamp": "2026-04-03T19:11:06.365040", "language": "python", "stall_type": "idle + repeated error", "resolution_status": "resolved"}
+{"timestamp": "2026-04-03T19:20:49.556054", "language": "python", "stall_type": "idle + repeated edit", "resolution_status": "resolved"}
+{"timestamp": "2026-04-03T19:21:19.770729", "language": "python", "stall_type": "idle + repeated error", "resolution_status": "resolved"}
+{"timestamp": "2026-04-03T19:23:38.827947", "language": "python", "stall_type": "idle + repeated edit", "resolution_status": "resolved"}
+{"timestamp": "2026-04-03T19:27:26.518674", "language": "python", "stall_type": "idle + repeated edit", "resolution_status": "resolved"}
+{"timestamp": "2026-04-03T19:38:34.307409", "language": "cpp", "stall_type": "idle + repeated edit", "resolution_status": "resolved"}
+{"timestamp": "2026-04-03T19:45:50.363188", "language": "cpp", "stall_type": "idle + repeated edit", "resolution_status": "resolved"}

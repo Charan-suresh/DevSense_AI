@@ -15,7 +15,7 @@ export class NotificationRenderer implements vscode.CodeLensProvider {
             const now = Date.now();
             let changed = false;
             for (const [key, val] of this.resolutions.entries()) {
-                if (now - val.timestamp > 30000) { // 30s timeout
+                if (now - val.timestamp > 15000) { // 15s timeout
                     this.resolutions.delete(key);
                     changed = true;
                 }

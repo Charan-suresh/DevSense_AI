@@ -42,17 +42,20 @@ async def resolve(data: dict):
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
+    print("WebSocket client connected")
 
     try:
         while True:
-            data = await websocket.receive_json()
+            raw = await websocket.receive_text()
+            data = json.loads(raw)
+
             resolution = await resolve_stall(data)
-            await websocket.send_json({"resolution": resolution})
+            await websocket.send_json({"uri": data.get("uri", ""), "resolution": resolution})
 
             log_entry = {
                 "timestamp": datetime.now().isoformat(),
                 "language": data.get("language"),
-                "stall_type": data.get("stall_type"),
+                "stall_type": data.get("stallType"),
                 "resolution_status": "resolved" if resolution else "unresolved",
             }
 
@@ -62,7 +65,11 @@ async def websocket_endpoint(websocket: WebSocket):
     except WebSocketDisconnect:
         print("Client disconnected")
     except Exception as e:
-        await websocket.send_json({"error": str(e)})
+        print(f"WebSocket error: {e}")
+        try:
+            await websocket.send_json({"error": str(e)})
+        except Exception:
+            pass
 
 
 if __name__ == "__main__":

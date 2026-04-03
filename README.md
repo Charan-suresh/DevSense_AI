@@ -1,80 +1,73 @@
-# DevSense Stall Detection Dashboard
+# 🧠 DevSense AI
 
-An interactive Streamlit dashboard visualizing anonymised stall logs from DevSense local backend telemetry.
-
-## Problem Statement
-
-Developers can get stuck in code stalls (idle loops, repeated edits, repeated errors) without fast observable insights. Existing tooling may not display real-time stall detection metrics and live timeline updates for mitigation.
-
-## Proposed Solution
-
-We ingest local `stall_log.json` events from DevSense backend logs and render a real-time Streamlit dashboard.
-- Compute today’s stalls, resolution rate, language and type distributions.
-- Provide a live-feed table of last 5 events.
-- Auto-refresh every 10 seconds for real-time updates.
-- No database required, simple JSON source only.
-
-## Tech Stack
-
-- Python 3.10+
-- Streamlit
-- JSON (standard library)
-- Optional: Streamlit Community Cloud for deployment
-
-## Architecture (text-based)
-
-Local file (`stall_log.json`) -> Python parser (`app.py`) -> Streamlit components:
-- Metric cards
-- Bar chart (language)
-- Pie chart (stall type)
-- Table (last 5 events)
-- Auto refresh (10s)
-
-## Live Demo Link (Streamlit)
-
-- Deployed URL: `https://your-streamlit-app-link.streamlit.app` (replace with actual after deployment)
-
-## Demo Video
-
-- Video link: `https://youtu.be/your-demo-video` (replace with public/unlisted YouTube or Google Drive URL)
-
-## Setup and Run Locally
-
-1. Install dependencies:
-
-```bash
-pip install streamlit
-```
-
-2. Confirm `stall_log.json` exists in the same folder as `app.py`.
-
-3. Start the app:
-
-```bash
-cd c:\Users\DELL\OneDrive\Desktop\DevSense_AI
-streamlit run app.py
-```
-
-4. Edit `stall_log.json`, and within 10 seconds Streamlit auto-refresh shows updates.
-
-## Deployment
-
-1. Create a Streamlit Community Cloud account.
-2. Connect GitHub repo.
-3. Deploy from this branch.
-4. Use generated URL as Live Demo Link in Form 2.
+**DevSense AI** is an intelligent VS Code extension and analytics platform that automatically detects when developers are stuck—or "stalled"—and instantly provides AI-powered, surgical code resolutions directly inline, using the blazing-fast Groq API.
 
 ---
 
-### Stall log format required
+## 🎯 The Problem
+Developers frequently get stuck in code stalls (idle loops, repeated errors, and code thrashing) without fast, observable insights. Existing AI tools often require developers to context-switch to a chat window or manually prompt the AI. 
 
-```json
-[
-  {
-    "timestamp": "2026-04-03T14:23:00",
-    "language": "Python",
-    "stall_type": "repeated_error",
-    "resolution_status": "resolved"
-  }
-]
+## 🚀 Our Solution
+DevSense AI lives entirely in the background. It watches your flow natively inside VS Code and **only interrupts you when it detects you are struggling**. It then uses **LLaMA-3.3-70b via Groq** to instantly generate a solution, projecting it right above your broken code as a CodeLens.
+
+### 🕵️‍♂️ How it Detects Stalls (Core Trackers)
+The master `StallDetector` fires off our AI resolution engine when it detects an overlap of any 2 of our 3 proprietary trackers:
+1. 🕒 **Idle Tracker**: Detects when a developer stops typing or moving their cursor for 25 seconds immediately after a code error.
+2. 🐛 **Persistent Bug Tracker**: Detects when the exact same diagnostic error (from Pylance, IntelliSense, etc.) refuses to go away across multiple edits.
+3. 🔄 **Code Thrashing Tracker**: Detects when a developer repeatedly edits the exact same isolated block 3+ times without successfully passing the compiler.
+
+---
+
+## 🏗️ Architecture & Tech Stack
+
+- **Frontend (VS Code Extension)**: Built in **TypeScript**. Uses WebSockets for real-time payload delivery and VS Code's native `CodeLensProvider` to inject AI suggestions inline without breaking developer flow.
+- **Backend Server**: Built with **FastAPI / Python**. A lightweight WebSocket server routing editor context and active compiler configurations to the LLM.
+- **AI Brain**: Powered by **Groq (`llama-3.3-70b-versatile`)** for extremely low-latency, highly contextual code diagnostics.
+- **Telemetry Dashboard**: Built with **Streamlit**. Reads our `stall_log.json` output to visualize team bottlenecks, stall distribution by language, and AI resolution success rates.
+
+---
+
+## 🛠️ How to Run the Project Locally
+
+### 1. Backend Server Setup
+Start by configuring your environment strings and launching the Python backend.
+
+```bash
+# 1. Activate your virtual environment and install dependencies
+source .venv/bin/activate
+pip install -r requirements.txt
+
+# 2. Add your Groq API Key to the .env file
+echo "GROQ_API_KEY=gsk_your_api_key_here" > .env
+
+# 3. Launch the FastAPI WebSocket Server
+export $(cat .env | xargs) && python -m uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload --reload-exclude .venv
 ```
+
+### 2. VS Code Extension Setup
+Now, start the Extension Development Host window.
+
+```bash
+# In a new terminal window:
+cd stall-detector
+npm install
+npm run compile
+code --extensionDevelopmentPath=$(pwd) ../
+```
+*Alternatively: Open the `stall-detector` folder inside VS Code and hit **F5** to automatically attach the debugger.*
+
+### 3. Open the Analytics Dashboard (Optional)
+Run our local telemetry dashboard to see anonymized stall tracking in real-time.
+```bash
+# In another terminal window:
+streamlit run dashboard/app.py
+```
+
+---
+
+## 💡 How to Test it Live
+1. In your **Extension Development Host** window, open any Python or C++ file.
+2. Intentionally type a blatant syntax or logic error (e.g., `print(undefined_variable)`).
+3. Wait for the standard red squiggly line to appear under the error.
+4. **Take your hands off the keyboard for 25 seconds.**
+5. DevSense will overlap your "Error" state with an "Idle" state, instantly ping the local WebSocket backend -> Groq, and a `💡 Stall Detector:` resolution will appear natively right above your code!

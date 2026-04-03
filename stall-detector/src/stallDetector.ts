@@ -12,7 +12,7 @@ export class StallDetector {
 
     // To avoid spamming, we can remember when we last reported a stall for a URI
     private lastReportedStalls: Map<string, number> = new Map();
-    private readonly STALL_COOLDOWN = 30000; // 30 seconds cooldown per file
+    private readonly STALL_COOLDOWN = 5000; // 5 seconds cooldown per file for easier testing
 
     constructor(idleTracker: IdleTracker, editTracker: EditTracker, errorTracker: ErrorTracker, wsClient: WsClient) {
         this.idleTracker = idleTracker;
