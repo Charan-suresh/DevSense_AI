@@ -4,7 +4,7 @@ import WebSocket from 'ws';
 export class WsClient {
     private ws: WebSocket | null = null;
 
-    private onMessageEvent = new vscode.EventEmitter<{ uri: string, resolution: string }>();
+    private onMessageEvent = new vscode.EventEmitter<{ uri: string, resolution: any }>();
     public readonly onDidReceiveResolution = this.onMessageEvent.event;
 
     constructor() {

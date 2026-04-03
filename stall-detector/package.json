@@ -28,6 +28,10 @@
       {
         "command": "stall-detector.helloWorld",
         "title": "Hello World"
+      },
+      {
+        "command": "stall-detector.applyFix",
+        "title": "Apply Fix"
       }
     ]
   },

@@ -9,7 +9,12 @@
 Developers frequently get stuck in code stalls (idle loops, repeated errors, and code thrashing) without fast, observable insights. Existing AI tools often require developers to context-switch to a chat window or manually prompt the AI. 
 
 ## 🚀 Our Solution
-DevSense AI lives entirely in the background. It watches your flow natively inside VS Code and **only interrupts you when it detects you are struggling**. It then uses **LLaMA-3.3-70b via Groq** to instantly generate a solution, projecting it right above your broken code as a CodeLens.
+DevSense AI lives entirely in the background. It watches your flow natively inside VS Code and **only interrupts you when it detects you are struggling**. It then uses **LLaMA-3.3-70b via Groq** to instantly generate a solution, projecting it right above your broken code.
+
+### ✨ What It Does
+- 💡 **Explains the Root Cause:** A one-line explanation of why your code broke.
+- ⚡ **Shows the Fix Inline:** A specific, actionable summary of the required fix.
+- ✨ **Applies the Fix Automatically:** An interactive CodeLens button that natively rewrites the broken code in your editor with a single click.
 
 ### 🕵️‍♂️ How it Detects Stalls (Core Trackers)
 The master `StallDetector` fires off our AI resolution engine when it detects an overlap of any 2 of our 3 proprietary trackers:
@@ -71,4 +76,9 @@ streamlit run dashboard/app.py
 2. Intentionally type a blatant syntax or logic error (e.g., `print(undefined_variable)`).
 3. Wait for the standard red squiggly line to appear under the error.
 4. **Take your hands off the keyboard for 25 seconds.**
-5. DevSense will overlap your "Error" state with an "Idle" state, instantly ping the local WebSocket backend -> Groq, and a `💡 Stall Detector:` resolution will appear natively right above your code!
+5. DevSense will overlap your "Error" state with an "Idle" state and instantly ping the local WebSocket backend -> Groq.
+6. A set of three CodeLenses will appear natively in your editor:
+   - 💡 An explanation of the problem.
+   - ⚡ A summary of the fix.
+   - ✨ An interactive **Apply Fix** button.
+7. Click **✨ Apply Fix** to see your code instantly and automatically repaired!

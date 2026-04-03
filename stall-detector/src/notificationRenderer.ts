@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import { WsClient } from './wsClient';
 
 export class NotificationRenderer implements vscode.CodeLensProvider {
-    private resolutions = new Map<string, { line: number, message: string, timestamp: number }>();
+    private resolutions = new Map<string, { line: number, message: any, timestamp: number }>();
 
     private readonly _onDidChangeCodeLenses: vscode.EventEmitter<void> = new vscode.EventEmitter<void>();
     public readonly onDidChangeCodeLenses: vscode.Event<void> = this._onDidChangeCodeLenses.event;
@@ -26,7 +26,7 @@ export class NotificationRenderer implements vscode.CodeLensProvider {
         }, 5000);
     }
 
-    private addResolution(uriString: string, resolution: string) {
+    private addResolution(uriString: string, resolution: any) {
         const editor = vscode.window.visibleTextEditors.find(e => e.document.uri.toString() === uriString);
         if (!editor) {return;}
 
@@ -50,11 +50,28 @@ export class NotificationRenderer implements vscode.CodeLensProvider {
         const res = this.resolutions.get(document.uri.toString());
         if (res) {
             const range = new vscode.Range(res.line, 0, res.line, 0);
-            const lens = new vscode.CodeLens(range, {
-                title: `💡 Stall Detector: ${res.message}`,
+            
+            const explanation = res.message?.explanation || "Stall detected";
+            const fix = res.message?.fix || "Inspect the code below.";
+            const codeToReplace = res.message?.codeToReplace || "";
+
+            const explanationLens = new vscode.CodeLens(range, {
+                title: `💡 ${explanation}`,
                 command: ''
             });
-            return [lens];
+
+            const fixLens = new vscode.CodeLens(range, {
+                title: `⚡ DevSense: ${fix}`,
+                command: ''
+            });
+
+            const applyLens = new vscode.CodeLens(range, {
+                title: `✨ Apply Fix`,
+                command: 'stall-detector.applyFix',
+                arguments: [document.uri.toString(), res.line, codeToReplace]
+            });
+
+            return [explanationLens, fixLens, applyLens];
         }
         return [];
     }
