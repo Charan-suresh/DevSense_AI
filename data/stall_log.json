@@ -1,23 +1,7 @@
-[
-  {
-    "timestamp": "2026-04-03T14:23:00",
-    "language": "Python",
-    "stall_type": "repeated_error",
-    "resolution_status": "resolved"
-  },
-  {
-    "timestamp": "2026-04-03T15:01:23",
-    "language": "JavaScript",
-    "stall_type": "idle",
-    "resolution_status": "unresolved"
-  },
-  {
-    "timestamp": "2026-04-03T15:22:10",
-    "language": "Python",
-    "stall_type": "repeated_edit",
-    "resolution_status": "resolved"
-  }
-]{"timestamp": "2026-04-03T19:03:04.632739", "language": "python", "stall_type": "idle + repeated error", "resolution_status": "resolved"}
+{"timestamp": "2026-04-03T14:23:00", "language": "Python", "stall_type": "repeated_error", "resolution_status": "resolved"}
+{"timestamp": "2026-04-03T15:01:23", "language": "JavaScript", "stall_type": "idle", "resolution_status": "unresolved"}
+{"timestamp": "2026-04-03T15:22:10", "language": "Python", "stall_type": "repeated_edit", "resolution_status": "resolved"}
+{"timestamp": "2026-04-03T19:03:04.632739", "language": "python", "stall_type": "idle + repeated error", "resolution_status": "resolved"}
 {"timestamp": "2026-04-03T19:06:31.127608", "language": "python", "stall_type": "idle + repeated error", "resolution_status": "resolved"}
 {"timestamp": "2026-04-03T19:06:32.696498", "language": "typescript", "stall_type": "repeated edit + idle", "resolution_status": "resolved"}
 {"timestamp": "2026-04-03T19:06:34.697992", "language": "python", "stall_type": "idle", "resolution_status": "resolved"}
@@ -28,3 +12,7 @@
 {"timestamp": "2026-04-03T19:27:26.518674", "language": "python", "stall_type": "idle + repeated edit", "resolution_status": "resolved"}
 {"timestamp": "2026-04-03T19:38:34.307409", "language": "cpp", "stall_type": "idle + repeated edit", "resolution_status": "resolved"}
 {"timestamp": "2026-04-03T19:45:50.363188", "language": "cpp", "stall_type": "idle + repeated edit", "resolution_status": "resolved"}
+{"timestamp": "2026-04-03T20:17:14.532868", "language": "cpp", "stall_type": "idle + repeated edit", "resolution_status": "resolved"}
+{"timestamp": "2026-04-03T20:18:20.346109", "language": "cpp", "stall_type": "idle + repeated edit", "resolution_status": "resolved"}
+{"timestamp": "2026-04-03T21:00:09.583222", "language": "cpp", "stall_type": "idle + repeated edit", "resolution_status": "resolved"}
+{"timestamp": "2026-04-03T21:02:52.116754", "language": "cpp", "stall_type": "idle + repeated edit", "resolution_status": "resolved"}

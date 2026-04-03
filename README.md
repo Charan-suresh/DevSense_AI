@@ -79,7 +79,7 @@ brew install ngrok/ngrok/ngrok
 # 2. Expose the dashboard port securely
 ngrok http 8501
 ```
-*This will generate a secure `https://...ngrok-free.app` URL that you can share with your team!*
+
 
 ---
 
