@@ -3,6 +3,7 @@ from datetime import datetime, date
 import math
 import os
 import streamlit as st
+from streamlit_autorefresh import st_autorefresh
 
 STALLED_FILE = os.path.join(
     os.path.dirname(os.path.dirname(__file__)),
@@ -16,18 +17,28 @@ st.title("DevSense Stall Detection Dashboard")
 st.write("Realtime, anonymised stall analytics from local stall_log.json")
 
 # 10 second auto-refresh
-st.autorefresh(interval=10_000, key="auto_refresh")
+st_autorefresh(interval=10_000, key="auto_refresh")
 
 
 def load_data(file_path):
     try:
         with open(file_path, "r", encoding="utf-8") as f:
-            data = json.load(f)
-            if not isinstance(data, list):
-                raise ValueError("stall_log.json must contain a list of stall events")
-            return data
+            raw = f.read().strip()
+
+        if not raw:
+            return []
+
+        try:
+            data = json.loads(raw)
+        except json.JSONDecodeError:
+            data = [json.loads(line) for line in raw.splitlines() if line.strip()]
+
+        if not isinstance(data, list):
+            raise ValueError("stall_log.json must contain a list of stall events or JSON lines")
+
+        return data
     except FileNotFoundError:
-        st.error(f"Config file '{file_path}' not found. Create it next to the app.")
+        st.error(f"Config file '{file_path}' not found.")
         return []
     except json.JSONDecodeError as exc:
         st.error(f"JSON decode error in '{file_path}': {exc}")
