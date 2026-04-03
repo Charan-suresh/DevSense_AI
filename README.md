@@ -69,6 +69,18 @@ Run our local telemetry dashboard to see anonymized stall tracking in real-time.
 streamlit run dashboard/app.py
 ```
 
+#### 🌍 Sharing the Dashboard Worldwide
+If you want to share a live view of your local dashboard with anyone over the internet (without deploying a database), you can tunnel the port securely using **[ngrok](https://ngrok.com/)**:
+
+```bash
+# 1. Install ngrok (if you haven't already)
+brew install ngrok/ngrok/ngrok
+
+# 2. Expose the dashboard port securely
+ngrok http 8501
+```
+*This will generate a secure `https://...ngrok-free.app` URL that you can share with your team!*
+
 ---
 
 ## 💡 How to Test it Live
