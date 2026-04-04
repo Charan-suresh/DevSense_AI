@@ -20,10 +20,12 @@ DevSense AI lives entirely in the background. It watches the developer's flow na
 ![DevSense comparison across activation, context awareness, and workflow impact](assets/devsense_comparison.png)
 
 ### 🕵️‍♂️ How it Detects Stalls (Core Trackers)
-The master `StallDetector` fires off our AI resolution engine when it detects an overlap of any 2 of our 3 proprietary trackers:
-1. 🕒 **Idle Tracker**: Detects when a developer stops typing or moving their cursor for 25 seconds immediately after a code error.
-2. 🐛 **Persistent Bug Tracker**: Detects when the exact same diagnostic error (from Pylance, IntelliSense, etc.) refuses to go away across multiple edits.
-3. 🔄 **Code Thrashing Tracker**: Detects when a developer repeatedly edits the exact same isolated block 3+ times without successfully passing the compiler.
+The master `StallDetector` fires off our AI resolution engine when it detects overlapping stall signals in the active file. Today, the detector looks for combinations of:
+1. 🕒 **Idle Tracker**: Detects when a developer stops typing or moving their cursor for about 10 seconds while the file remains in a broken state.
+2. 🐛 **Persistent Bug Tracker**: Detects when the same diagnostic error (from Pylance, IntelliSense, etc.) persists across multiple edits.
+3. 🔄 **Code Thrashing Tracker**: Detects when a developer repeatedly edits the same code block 3+ times without successfully resolving the issue.
+4. ▶️ **Repeated Failed Runs**: Detects when the same file keeps failing during repeated terminal or task executions.
+5. 📉 **Lack Of Progress**: Detects when errors remain active after multiple edits and failed runs without improvement.
 
 ---
 
@@ -41,6 +43,16 @@ The master `StallDetector` fires off our AI resolution engine when it detects an
 
 ## 🛠️ How to Run the Project Locally
 
+### 0. Clone the Repository
+If you are testing DevSense on a new machine, start by cloning the repository and creating a Python virtual environment.
+
+```bash
+git clone https://github.com/Charan-suresh/DevSense_AI.git
+cd DevSense_AI
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
 ### 1. Backend Server Setup
 Start by configuring the environment strings and launching the Python backend.
 
@@ -49,12 +61,14 @@ Start by configuring the environment strings and launching the Python backend.
 source .venv/bin/activate
 pip install -r requirements.txt
 
-# 2. Add a Groq API Key to the .env file
+# 2. Add your own Groq API Key to the .env file
 echo "GROQ_API_KEY=gsk_your_api_key_here" > .env
 
 # 3. Launch the FastAPI WebSocket Server
 export $(cat .env | xargs) && python -m uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload --reload-exclude .venv
 ```
+
+The backend must be running before the VS Code extension can send a stall payload and receive an AI-generated fix.
 
 ### 2. VS Code Extension Setup
 Now, start the Extension Development Host window.
@@ -67,6 +81,8 @@ npm run compile
 code --extensionDevelopmentPath=$(pwd) ../
 ```
 *Alternatively: Open the `stall-detector` folder inside VS Code and hit **F5** to automatically attach the debugger.*
+
+When the extension is active, DevSense surfaces suggestions inline with CodeLenses and also shows a visible VS Code notification when a resolution arrives.
 
 ### 3. Open the Analytics Dashboard (Optional)
 Run the local telemetry dashboard to see anonymized stall tracking in real-time.
@@ -92,10 +108,22 @@ ngrok http 8501
 1. In the **Extension Development Host** window, open any Python or C++ file.
 2. Intentionally type a blatant syntax or logic error (e.g., `print(undefined_variable)`).
 3. Wait for the standard red squiggly line to appear under the error.
-4. **Stop typing and leave the cursor idle for 25 seconds.**
-5. DevSense will overlap the "Error" state with an "Idle" state and instantly ping the local WebSocket backend -> Groq.
-6. A set of three CodeLenses will appear natively in the editor:
+4. Make a few edits that do not fix the problem, or repeatedly run the broken file from the VS Code integrated terminal.
+5. Stop typing and leave the cursor idle for about 10 seconds.
+6. DevSense will detect overlapping stall signals and ping the local WebSocket backend -> Groq.
+7. You should see both a VS Code notification and a set of three CodeLenses in the editor:
    - 💡 An explanation of the problem.
    - ⚡ A summary of the fix.
    - ✨ An interactive **Apply Fix** button.
-7. Click **✨ Apply Fix** to see the code instantly and automatically repaired!
+8. Click **✨ Apply Fix** to see the code instantly and automatically repaired.
+
+## 🧪 How Others Can Test This
+If you want another person, judge, or teammate to test DevSense on their own system:
+
+1. Share the repository URL, not your local files.
+2. Ask them to clone the repo, create `.venv`, install Python dependencies, and run `npm install` inside `stall-detector`.
+3. Make sure they create their own `.env` file with their own `GROQ_API_KEY`.
+4. Have them start the backend first, then launch the VS Code extension in an Extension Development Host.
+5. Ask them to test using a file that produces real VS Code diagnostics, not just terminal-only runtime failures.
+
+Do not share your personal API key. Each tester should use their own Groq key.
