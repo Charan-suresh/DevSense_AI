@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { logDevSense } from './logger';
 
 interface ErrorRecord {
     message: string;
@@ -60,6 +61,11 @@ export class ErrorTracker {
                     message: msg,
                     timestamp: now
                 });
+                logDevSense('Error tracker counted diagnostic occurrence', {
+                    uri: key,
+                    message: msg,
+                    revision
+                });
             }
 
             this.diagnosticsHistory.set(key, history);
@@ -73,6 +79,11 @@ export class ErrorTracker {
                     const uniqueKey = `${key}:${record.message}`;
                     if (!this.alreadyFiredErrors.has(uniqueKey)) {
                         this.alreadyFiredErrors.add(uniqueKey);
+                        logDevSense('Error tracker emitted repeated-error signal', {
+                            uri: key,
+                            message: record.message,
+                            count: counts[record.message]
+                        });
                         this.onRepeatedErrorEvent.fire({
                             uri,
                             errorMessage: record.message

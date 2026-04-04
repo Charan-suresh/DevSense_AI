@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { logDevSense } from './logger';
 
 interface ProgressState {
     currentErrorFingerprints: Set<string>;
@@ -42,6 +43,10 @@ export class ProgressTracker {
 
         const state = this.getOrCreateState(e.document.uri);
         state.editCountSinceImprovement += 1;
+        logDevSense('Progress tracker counted edit', {
+            uri: e.document.uri.toString(),
+            editCountSinceImprovement: state.editCountSinceImprovement
+        });
         this.evaluateState(e.document.uri, state);
     }
 
@@ -63,6 +68,7 @@ export class ProgressTracker {
             if (improved) {
                 state.editCountSinceImprovement = 0;
                 state.failedRunsSinceImprovement = 0;
+                logDevSense('Progress tracker detected improvement', { uri: uri.toString() });
             }
 
             state.currentErrorFingerprints = currentFingerprints;
@@ -83,8 +89,14 @@ export class ProgressTracker {
         if (exitCode === 0) {
             state.editCountSinceImprovement = 0;
             state.failedRunsSinceImprovement = 0;
+            logDevSense('Progress tracker recorded successful run', { uri: uri.toString() });
         } else {
             state.failedRunsSinceImprovement += 1;
+            logDevSense('Progress tracker recorded failed run', {
+                uri: uri.toString(),
+                failedRunsSinceImprovement: state.failedRunsSinceImprovement,
+                exitCode
+            });
         }
 
         this.evaluateState(uri, state);
@@ -101,14 +113,25 @@ export class ProgressTracker {
         const becameStalled = nextLackOfProgress && !state.hasLackOfProgress;
         const becameRepeatedFailures = nextRepeatedFailures && !state.hasRepeatedFailures;
 
+        logDevSense('Progress tracker evaluated state', {
+            uri: uri.toString(),
+            hasErrors,
+            editCountSinceImprovement: state.editCountSinceImprovement,
+            failedRunsSinceImprovement: state.failedRunsSinceImprovement,
+            nextLackOfProgress,
+            nextRepeatedFailures
+        });
+
         state.hasLackOfProgress = nextLackOfProgress;
         state.hasRepeatedFailures = nextRepeatedFailures;
 
         if (becameStalled) {
+            logDevSense('Progress tracker emitted lack-of-progress signal', { uri: uri.toString() });
             this.onLackOfProgressEvent.fire({ uri });
         }
 
         if (becameRepeatedFailures) {
+            logDevSense('Progress tracker emitted repeated-failures signal', { uri: uri.toString() });
             this.onRepeatedFailuresEvent.fire({ uri });
         }
     }

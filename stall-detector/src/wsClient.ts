@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import WebSocket from 'ws';
+import { logDevSense } from './logger';
 
 export class WsClient {
     private ws: WebSocket | null = null;
@@ -28,13 +29,19 @@ export class WsClient {
 
         const config = vscode.workspace.getConfiguration('stallDetector');
         const url = config.get<string>('websocketUrl', 'ws://localhost:8000/ws');
+        logDevSense('Connecting WebSocket', { url });
 
         try {
             this.ws = new WebSocket(url);
 
+            this.ws.on('open', () => {
+                logDevSense('WebSocket connected', { url });
+            });
+
             this.ws.on('message', (data) => {
                 try {
                     const parsed = JSON.parse(data.toString());
+                    logDevSense('WebSocket message received', parsed);
                     // Expecting payload: { uri: string, resolution: string }
                     if (parsed.uri && parsed.resolution) {
                         this.onMessageEvent.fire({
@@ -52,32 +59,53 @@ export class WsClient {
                         }
                     }
                 } catch (e) {
+                    logDevSense('Failed to parse WebSocket message', String(e));
                     console.error('Failed to parse WebSocket message', e);
                 }
             });
 
             this.ws.on('error', (err) => {
+                logDevSense('WebSocket error', String(err));
                 console.error('WebSocket error:', err);
             });
 
             this.ws.on('close', () => {
+                logDevSense('WebSocket closed');
                 console.log('WebSocket closed');
             });
         } catch (e) {
+            logDevSense('Failed to connect to WebSocket', String(e));
             console.error('Failed to connect to WebSocket', e);
         }
     }
 
     public sendPayload(payload: any) {
         if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+            logDevSense('WebSocket sending payload', {
+                uri: payload?.uri,
+                stallType: payload?.stallType
+            });
             this.ws.send(JSON.stringify(payload));
         } else {
+            logDevSense('WebSocket not open, reconnecting before send', {
+                uri: payload?.uri,
+                stallType: payload?.stallType
+            });
             console.warn('WebSocket is not open. Initializing connection and re-sending...');
             this.connect();
             // simple retry after a bit
             setTimeout(() => {
                 if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+                    logDevSense('WebSocket retry send succeeded', {
+                        uri: payload?.uri,
+                        stallType: payload?.stallType
+                    });
                     this.ws.send(JSON.stringify(payload));
+                } else {
+                    logDevSense('WebSocket retry send failed', {
+                        uri: payload?.uri,
+                        stallType: payload?.stallType
+                    });
                 }
             }, 1000);
         }

@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { WsClient } from './wsClient';
+import { logDevSense } from './logger';
 
 export class NotificationRenderer implements vscode.CodeLensProvider {
     private resolutions = new Map<string, { line: number, message: any, timestamp: number }>();
@@ -28,7 +29,10 @@ export class NotificationRenderer implements vscode.CodeLensProvider {
 
     private addResolution(uriString: string, resolution: any) {
         const editor = vscode.window.visibleTextEditors.find(e => e.document.uri.toString() === uriString);
-        if (!editor) {return;}
+        if (!editor) {
+            logDevSense('Resolution received for non-visible editor', { uri: uriString });
+            return;
+        }
 
         let line = editor.selection.active.line;
         const diagnostics = vscode.languages.getDiagnostics(editor.document.uri);
@@ -41,6 +45,13 @@ export class NotificationRenderer implements vscode.CodeLensProvider {
             line,
             message: resolution,
             timestamp: Date.now()
+        });
+
+        logDevSense('Rendering resolution', {
+            uri: uriString,
+            line,
+            explanation: resolution?.explanation,
+            fix: resolution?.fix
         });
 
         const explanation = resolution?.explanation || 'Stall detected';

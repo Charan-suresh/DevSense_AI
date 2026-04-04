@@ -116,14 +116,3 @@ ngrok http 8501
    - ⚡ A summary of the fix.
    - ✨ An interactive **Apply Fix** button.
 8. Click **✨ Apply Fix** to see the code instantly and automatically repaired.
-
-## 🧪 How Others Can Test This
-If you want another person, judge, or teammate to test DevSense on their own system:
-
-1. Share the repository URL, not your local files.
-2. Ask them to clone the repo, create `.venv`, install Python dependencies, and run `npm install` inside `stall-detector`.
-3. Make sure they create their own `.env` file with their own `GROQ_API_KEY`.
-4. Have them start the backend first, then launch the VS Code extension in an Extension Development Host.
-5. Ask them to test using a file that produces real VS Code diagnostics, not just terminal-only runtime failures.
-
-Do not share your personal API key. Each tester should use their own Groq key.

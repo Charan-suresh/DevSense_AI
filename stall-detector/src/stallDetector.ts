@@ -4,6 +4,7 @@ import { EditTracker } from './editTracker';
 import { ErrorTracker } from './errorTracker';
 import { ProgressTracker } from './progressTracker';
 import { WsClient } from './wsClient';
+import { logDevSense } from './logger';
 
 export class StallDetector {
     private idleTracker: IdleTracker;
@@ -30,12 +31,13 @@ export class StallDetector {
         this.progressTracker.onDidDetectRepeatedFailures(e => this.checkStall(e.uri, 'repeated failed run'));
     }
 
-    private async checkStall(uri: vscode.Uri, _source: string) {
+    private async checkStall(uri: vscode.Uri, source: string) {
         const key = uri.toString();
         const now = Date.now();
         const lastStall = this.lastReportedStalls.get(key) || 0;
 
         if (now - lastStall < this.STALL_COOLDOWN) {
+            logDevSense('Skipping stall check due to cooldown', { uri: key, source });
             return;
         }
 
@@ -52,11 +54,19 @@ export class StallDetector {
         if (isRepeatedFailure) { activeSignals.push('repeated failed run'); }
         if (isNoProgress) { activeSignals.push('lack of progress'); }
 
+        logDevSense('Stall check evaluated', {
+            uri: key,
+            source,
+            activeSignals
+        });
+
         if (activeSignals.length < 2 && !isNoProgress) {
+            logDevSense('Stall check did not meet threshold', { uri: key, source });
             return;
         }
 
         this.lastReportedStalls.set(key, now);
+        logDevSense('Stall detected', { uri: key, stallType: activeSignals.join(' + ') });
         await this.packageAndSendPayload(uri, activeSignals.join(' + '));
 
         // Optionally reset edit count so it needs 3 more edits to trigger again
@@ -107,6 +117,13 @@ export class StallDetector {
             uri: uri.toString()
         };
 
+        logDevSense('Sending stall payload', {
+            uri: payload.uri,
+            language: payload.language,
+            stallType: payload.stallType,
+            hasErrorMessage: Boolean(payload.errorMessage),
+            blockPreview: blockContent.slice(0, 120)
+        });
         this.wsClient.sendPayload(payload);
     }
 

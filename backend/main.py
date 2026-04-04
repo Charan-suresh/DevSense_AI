@@ -48,8 +48,19 @@ async def websocket_endpoint(websocket: WebSocket):
         while True:
             raw = await websocket.receive_text()
             data = json.loads(raw)
+            print("WebSocket payload received:", json.dumps({
+                "uri": data.get("uri", ""),
+                "language": data.get("language", ""),
+                "stallType": data.get("stallType", ""),
+                "hasErrorMessage": bool(data.get("errorMessage")),
+            }))
 
             resolution = await resolve_stall(data)
+            print("Resolution generated:", json.dumps({
+                "uri": data.get("uri", ""),
+                "hasResolution": bool(resolution),
+                "keys": list(resolution.keys()) if isinstance(resolution, dict) else None,
+            }))
             await websocket.send_json({"uri": data.get("uri", ""), "resolution": resolution})
 
             log_entry = {

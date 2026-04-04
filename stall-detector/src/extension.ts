@@ -6,6 +6,7 @@ import { ProgressTracker } from './progressTracker';
 import { WsClient } from './wsClient';
 import { StallDetector } from './stallDetector';
 import { NotificationRenderer } from './notificationRenderer';
+import { getDevSenseOutputChannel, logDevSense } from './logger';
 
 export function activate(context: vscode.ExtensionContext) {
 	const idleTracker = new IdleTracker();
@@ -35,10 +36,11 @@ export function activate(context: vscode.ExtensionContext) {
 		wsClient,
 		stallDetector,
 		applyFixCommand,
+		getDevSenseOutputChannel(),
 		vscode.languages.registerCodeLensProvider({ scheme: 'file' }, notificationRenderer)
 	);
 
-	console.log('Stall Detector is now active!');
+	logDevSense('Stall Detector activated');
 }
 
 export function deactivate() { }
