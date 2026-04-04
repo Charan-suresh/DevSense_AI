@@ -32,7 +32,7 @@ The master `StallDetector` fires off our AI resolution engine when it detects an
 - **Frontend (VS Code Extension)**: Built in **TypeScript**. Uses WebSockets for real-time payload delivery and VS Code's native `CodeLensProvider` to inject AI suggestions inline without breaking developer flow.
 - **Backend Server**: Built with **FastAPI / Python**. A lightweight WebSocket server routing editor context and active compiler configurations to the LLM.
 - **AI Brain**: Powered by **Groq (`llama-3.3-70b-versatile`)** for extremely low-latency, highly contextual code diagnostics.
-- **Telemetry Dashboard**: Built with **Streamlit**. Reads our `stall_log.json` output to visualize team bottlenecks, stall distribution by language, and AI resolution success rates.
+- **Telemetry Dashboard**: Built with **Streamlit**. Reads our `stall_log.jsonl` output to visualize team bottlenecks, stall distribution by language, and AI resolution success rates.
 
 ### 📈 Dashboard Preview
 ![DevSense stall detection dashboard preview](assets/dashboard_preview.png)

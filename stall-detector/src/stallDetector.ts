@@ -2,30 +2,34 @@ import * as vscode from 'vscode';
 import { IdleTracker } from './idleTracker';
 import { EditTracker } from './editTracker';
 import { ErrorTracker } from './errorTracker';
+import { ProgressTracker } from './progressTracker';
 import { WsClient } from './wsClient';
 
 export class StallDetector {
     private idleTracker: IdleTracker;
     private editTracker: EditTracker;
     private errorTracker: ErrorTracker;
+    private progressTracker: ProgressTracker;
     private wsClient: WsClient;
 
     // To avoid spamming, we can remember when we last reported a stall for a URI
     private lastReportedStalls: Map<string, number> = new Map();
     private readonly STALL_COOLDOWN = 5000; // 5 seconds cooldown per file for easier testing
 
-    constructor(idleTracker: IdleTracker, editTracker: EditTracker, errorTracker: ErrorTracker, wsClient: WsClient) {
+    constructor(idleTracker: IdleTracker, editTracker: EditTracker, errorTracker: ErrorTracker, progressTracker: ProgressTracker, wsClient: WsClient) {
         this.idleTracker = idleTracker;
         this.editTracker = editTracker;
         this.errorTracker = errorTracker;
+        this.progressTracker = progressTracker;
         this.wsClient = wsClient;
 
         this.idleTracker.onDidBecomeIdle(uri => this.checkStall(uri, 'idle'));
         this.editTracker.onDidDetectRepeatedEdit(e => this.checkStall(e.uri, 'repeated edit'));
         this.errorTracker.onDidDetectRepeatedError(e => this.checkStall(e.uri, 'repeated error'));
+        this.progressTracker.onDidDetectLackOfProgress(e => this.checkStall(e.uri, 'lack of progress'));
     }
 
-    private async checkStall(uri: vscode.Uri, source: string) {
+    private async checkStall(uri: vscode.Uri, _source: string) {
         const key = uri.toString();
         const now = Date.now();
         const lastStall = this.lastReportedStalls.get(key) || 0;
@@ -37,15 +41,20 @@ export class StallDetector {
         const isIdle = this.idleTracker.isIdle(uri);
         const isEdit = this.editTracker.isRepeatedEditStatus(uri);
         const isError = this.errorTracker.isRepeatedErrorStatus(uri);
+        const isNoProgress = this.progressTracker.isLackOfProgressStatus(uri);
 
-        let overlapCount = 0;
-        let stallTypes: string[] = [];
+        if (!isNoProgress) {
+            return;
+        }
 
-        if (isIdle) { overlapCount++; stallTypes.push('idle'); }
-        if (isEdit) { overlapCount++; stallTypes.push('repeated edit'); }
-        if (isError) { overlapCount++; stallTypes.push('repeated error'); }
+        let supportingSignals = 0;
+        const stallTypes: string[] = ['lack of progress'];
 
-        if (overlapCount >= 2) {
+        if (isIdle) { supportingSignals++; stallTypes.push('idle'); }
+        if (isEdit) { supportingSignals++; stallTypes.push('repeated edit'); }
+        if (isError) { supportingSignals++; stallTypes.push('repeated error'); }
+
+        if (supportingSignals >= 1) {
             this.lastReportedStalls.set(key, now);
             await this.packageAndSendPayload(uri, stallTypes.join(' + '));
 

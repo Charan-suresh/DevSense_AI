@@ -9,7 +9,7 @@ from backend.claude_handler import resolve_stall
 app = FastAPI(title="DevSense AI Backend")
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-STALL_LOG_FILE = os.path.join(BASE_DIR, "data", "stall_log.json")
+STALL_LOG_FILE = os.path.join(BASE_DIR, "data", "stall_log.jsonl")
 os.makedirs(os.path.dirname(STALL_LOG_FILE), exist_ok=True)
 
 

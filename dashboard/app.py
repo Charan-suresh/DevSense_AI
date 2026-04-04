@@ -8,7 +8,7 @@ from streamlit_autorefresh import st_autorefresh
 STALLED_FILE = os.path.join(
     os.path.dirname(os.path.dirname(__file__)),
     "data",
-    "stall_log.json",
+    "stall_log.jsonl",
 )
 
 st.set_page_config(page_title="DevSense Stall Monitor", layout="wide")
@@ -34,7 +34,7 @@ def load_data(file_path):
             data = [json.loads(line) for line in raw.splitlines() if line.strip()]
 
         if not isinstance(data, list):
-            raise ValueError("stall_log.json must contain a list of stall events or JSON lines")
+            raise ValueError("stall_log.jsonl must contain a list of stall events or JSON lines")
 
         return data
     except FileNotFoundError:

@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 export class IdleTracker {
     private timers: Map<string, NodeJS.Timeout> = new Map();
     private idleStates: Map<string, boolean> = new Map();
-    private readonly IDLE_THRESHOLD = 25000; // 25 seconds
+    private readonly IDLE_THRESHOLD = 10000; // 10 seconds
 
     private onIdleEvent = new vscode.EventEmitter<vscode.Uri>();
     public readonly onDidBecomeIdle = this.onIdleEvent.event;
