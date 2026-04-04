@@ -27,6 +27,7 @@ export class StallDetector {
         this.editTracker.onDidDetectRepeatedEdit(e => this.checkStall(e.uri, 'repeated edit'));
         this.errorTracker.onDidDetectRepeatedError(e => this.checkStall(e.uri, 'repeated error'));
         this.progressTracker.onDidDetectLackOfProgress(e => this.checkStall(e.uri, 'lack of progress'));
+        this.progressTracker.onDidDetectRepeatedFailures(e => this.checkStall(e.uri, 'repeated failed run'));
     }
 
     private async checkStall(uri: vscode.Uri, _source: string) {
@@ -42,25 +43,24 @@ export class StallDetector {
         const isEdit = this.editTracker.isRepeatedEditStatus(uri);
         const isError = this.errorTracker.isRepeatedErrorStatus(uri);
         const isNoProgress = this.progressTracker.isLackOfProgressStatus(uri);
+        const isRepeatedFailure = this.progressTracker.isRepeatedFailureStatus(uri);
 
-        if (!isNoProgress) {
+        const activeSignals: string[] = [];
+        if (isIdle) { activeSignals.push('idle'); }
+        if (isEdit) { activeSignals.push('repeated edit'); }
+        if (isError) { activeSignals.push('repeated error'); }
+        if (isRepeatedFailure) { activeSignals.push('repeated failed run'); }
+        if (isNoProgress) { activeSignals.push('lack of progress'); }
+
+        if (activeSignals.length < 2 && !isNoProgress) {
             return;
         }
 
-        let supportingSignals = 0;
-        const stallTypes: string[] = ['lack of progress'];
+        this.lastReportedStalls.set(key, now);
+        await this.packageAndSendPayload(uri, activeSignals.join(' + '));
 
-        if (isIdle) { supportingSignals++; stallTypes.push('idle'); }
-        if (isEdit) { supportingSignals++; stallTypes.push('repeated edit'); }
-        if (isError) { supportingSignals++; stallTypes.push('repeated error'); }
-
-        if (supportingSignals >= 1) {
-            this.lastReportedStalls.set(key, now);
-            await this.packageAndSendPayload(uri, stallTypes.join(' + '));
-
-            // Optionally reset edit count so it needs 3 more edits to trigger again
-            this.editTracker.reset();
-        }
+        // Optionally reset edit count so it needs 3 more edits to trigger again
+        this.editTracker.reset();
     }
 
     private async packageAndSendPayload(uri: vscode.Uri, stallType: string) {

@@ -43,6 +43,10 @@ export class NotificationRenderer implements vscode.CodeLensProvider {
             timestamp: Date.now()
         });
 
+        const explanation = resolution?.explanation || 'Stall detected';
+        const fix = resolution?.fix || 'DevSense added inline suggestions to the current file.';
+        void vscode.window.showInformationMessage(`DevSense: ${explanation} ${fix}`);
+
         this._onDidChangeCodeLenses.fire();
     }
 

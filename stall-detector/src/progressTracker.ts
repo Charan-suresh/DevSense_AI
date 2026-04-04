@@ -6,15 +6,19 @@ interface ProgressState {
     editCountSinceImprovement: number;
     failedRunsSinceImprovement: number;
     hasLackOfProgress: boolean;
+    hasRepeatedFailures: boolean;
 }
 
 export class ProgressTracker {
     private readonly states: Map<string, ProgressState> = new Map();
     private readonly MIN_EDITS_WITHOUT_PROGRESS = 3;
     private readonly MIN_FAILED_RUNS_WITHOUT_PROGRESS = 1;
+    private readonly MIN_FAILED_RUNS_FOR_SIGNAL = 3;
 
     private readonly onLackOfProgressEvent = new vscode.EventEmitter<{ uri: vscode.Uri }>();
     public readonly onDidDetectLackOfProgress = this.onLackOfProgressEvent.event;
+    private readonly onRepeatedFailuresEvent = new vscode.EventEmitter<{ uri: vscode.Uri }>();
+    public readonly onDidDetectRepeatedFailures = this.onRepeatedFailuresEvent.event;
 
     constructor() {
         vscode.workspace.onDidChangeTextDocument(e => this.handleDocumentChange(e));
@@ -90,14 +94,22 @@ export class ProgressTracker {
         const hasErrors = state.currentErrorCount > 0;
         const enoughEditEffort = state.editCountSinceImprovement >= this.MIN_EDITS_WITHOUT_PROGRESS;
         const enoughFailedRuns = state.failedRunsSinceImprovement >= this.MIN_FAILED_RUNS_WITHOUT_PROGRESS;
+        const enoughFailedRunsForSignal = state.failedRunsSinceImprovement >= this.MIN_FAILED_RUNS_FOR_SIGNAL;
 
         const nextLackOfProgress = hasErrors && enoughEditEffort && enoughFailedRuns;
+        const nextRepeatedFailures = hasErrors && enoughFailedRunsForSignal;
         const becameStalled = nextLackOfProgress && !state.hasLackOfProgress;
+        const becameRepeatedFailures = nextRepeatedFailures && !state.hasRepeatedFailures;
 
         state.hasLackOfProgress = nextLackOfProgress;
+        state.hasRepeatedFailures = nextRepeatedFailures;
 
         if (becameStalled) {
             this.onLackOfProgressEvent.fire({ uri });
+        }
+
+        if (becameRepeatedFailures) {
+            this.onRepeatedFailuresEvent.fire({ uri });
         }
     }
 
@@ -133,7 +145,8 @@ export class ProgressTracker {
                 currentErrorCount: vscode.languages.getDiagnostics(uri).filter(d => d.severity === vscode.DiagnosticSeverity.Error).length,
                 editCountSinceImprovement: 0,
                 failedRunsSinceImprovement: 0,
-                hasLackOfProgress: false
+                hasLackOfProgress: false,
+                hasRepeatedFailures: false
             };
             this.states.set(key, state);
         }
@@ -145,8 +158,13 @@ export class ProgressTracker {
         return this.getOrCreateState(uri).hasLackOfProgress;
     }
 
+    public isRepeatedFailureStatus(uri: vscode.Uri): boolean {
+        return this.getOrCreateState(uri).hasRepeatedFailures;
+    }
+
     public dispose() {
         this.states.clear();
         this.onLackOfProgressEvent.dispose();
+        this.onRepeatedFailuresEvent.dispose();
     }
 }

@@ -13,13 +13,22 @@ export class ErrorTracker {
     private onRepeatedErrorEvent = new vscode.EventEmitter<{ uri: vscode.Uri, errorMessage: string }>();
     public readonly onDidDetectRepeatedError = this.onRepeatedErrorEvent.event;
 
-    // Track last seen diagnostic messages to avoid duplicates from a single change event
-    private lastSeenDiagnostics: Map<string, string[]> = new Map();
+    // Track document revisions so persistent diagnostics can be counted across edits.
+    private documentRevisions: Map<string, number> = new Map();
+    private lastCountedRevisionByMessage: Map<string, Map<string, number>> = new Map();
 
     // Track which errors have already fired an event to avoid spamming
     private alreadyFiredErrors: Set<string> = new Set();
 
     constructor() {
+        vscode.workspace.onDidChangeTextDocument(e => {
+            if (e.document.uri.scheme !== 'file' || e.contentChanges.length === 0) {
+                return;
+            }
+
+            const key = e.document.uri.toString();
+            this.documentRevisions.set(key, (this.documentRevisions.get(key) || 0) + 1);
+        });
         vscode.languages.onDidChangeDiagnostics(e => this.handleDiagnosticsChange(e));
     }
 
@@ -32,21 +41,21 @@ export class ErrorTracker {
             const key = uri.toString();
             const diagnostics = vscode.languages.getDiagnostics(uri);
             const errors = diagnostics.filter(d => d.severity === vscode.DiagnosticSeverity.Error);
-
-            const currentMessages = errors.map(e => e.message);
-            const lastSeen = this.lastSeenDiagnostics.get(key) || [];
-
-            // Find exactly new errors
-            const newErrors = currentMessages.filter(msg => !lastSeen.includes(msg));
-            this.lastSeenDiagnostics.set(key, currentMessages);
-
-            if (newErrors.length === 0) {continue;}
+            if (errors.length === 0) {continue;}
 
             let history = this.diagnosticsHistory.get(key) || [];
             // filter out old
             history = history.filter(record => now - record.timestamp <= this.TIME_WINDOW);
 
-            for (const msg of newErrors) {
+            const revision = this.documentRevisions.get(key) || 0;
+            const countedRevisions = this.lastCountedRevisionByMessage.get(key) || new Map<string, number>();
+
+            for (const msg of new Set(errors.map(error => error.message))) {
+                if (countedRevisions.get(msg) === revision) {
+                    continue;
+                }
+
+                countedRevisions.set(msg, revision);
                 history.push({
                     message: msg,
                     timestamp: now
@@ -54,6 +63,7 @@ export class ErrorTracker {
             }
 
             this.diagnosticsHistory.set(key, history);
+            this.lastCountedRevisionByMessage.set(key, countedRevisions);
 
             // Check if any error appears 3+ times
             const counts: { [msg: string]: number } = {};
@@ -119,7 +129,8 @@ export class ErrorTracker {
 
     public dispose() {
         this.diagnosticsHistory.clear();
-        this.lastSeenDiagnostics.clear();
+        this.documentRevisions.clear();
+        this.lastCountedRevisionByMessage.clear();
         this.alreadyFiredErrors.clear();
         this.onRepeatedErrorEvent.dispose();
     }
