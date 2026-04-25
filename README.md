@@ -1,8 +1,6 @@
 # 🧠 DevSense AI
 
-![DevSense AI Stall Detector Demo](assets/stall_detector_demo.png)
-**DevSense AI** is an intelligent VS Code extension and analytics platform that automatically detects when developers are stuck—or "stalled"—and instantly provides AI-powered, surgical code resolutions directly inline, using the blazing-fast Groq API.
-
+DevSense AI is a non-intrusive, intelligent developer productivity engine. It proactively identifies "code stalls"—periods of friction caused by persistent bugs or syntax loops—and delivers surgical, AI-powered resolutions directly within the VS Code environment. Powered by the Groq LLaMA-3 inference engine, DevSense eliminates context-switching by projecting real-time fixes exactly where they are needed.
 ---
 
 ## 🎯 The Problem
